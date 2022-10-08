@@ -1,15 +1,51 @@
+//** Create Read */
+
 import * as express from "express";
+import catsRouter from "./cats/cats.route";
 
-const app: express.Express = express();
+class Server {
+  public app: express.Application;
 
-const port: number = 8000;
+  constructor() {
+    const app: express.Application = express();
+    this.app = app;
+  }
 
-app.get("/testsdassd", (req: express.Request, res: express.Response) => {
-  console.log(req);
-  res.send({ name: "LEE JU WON", age: 99, friends: ["ss", "ys", "ye"] });
-  res.send("sadjklas");
-});
+  private setRoute() {
+    this.app.use(catsRouter);
+  }
 
-app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}/`);
-});
+  private setMiddleware() {
+    //* logging middleware
+    this.app.use((req, res, next) => {
+      console.log(req.rawHeaders[1]);
+      console.log("this is logging middleware");
+      next();
+    });
+
+    //* json middleware
+    this.app.use(express.json());
+
+    this.setRoute();
+
+    //* 404 middleware
+    this.app.use((req, res, next) => {
+      console.log("this is error middleware");
+      res.send({ error: "404 not found error" });
+    });
+  }
+
+  public listen() {
+    this.setMiddleware();
+    this.app.listen(8000, () => {
+      console.log("server is on...");
+    });
+  }
+}
+
+function init() {
+  const server = new Server();
+  server.listen();
+}
+
+init();
